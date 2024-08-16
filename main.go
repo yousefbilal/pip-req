@@ -6,18 +6,24 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
 	"github.com/alexflint/go-arg"
 )
 
 func main() {
-
 	var args struct {
-		PackageName string `arg:"positional,required"`
-		Version	 string `arg:"-v,--version"`
+		PackageName    string `arg:"positional,required"`
+		PackageVersion string `arg:"-v,--version"`
 	}
 	arg.MustParse(&args)
 
-	resp, err := http.Get(fmt.Sprintf("https://pypi.org/pypi/%s/json", args.PackageName))
+	apiUrl := "https://pypi.org/pypi/" + args.PackageName
+	if args.PackageVersion != "" {
+		apiUrl += "/" + args.PackageVersion
+	}
+	apiUrl += "/json"
+
+	resp, err := http.Get(apiUrl)
 
 	if err != nil {
 		fmt.Printf("error making http request: %s\n", err)
@@ -40,5 +46,4 @@ func main() {
 	}
 
 	fmt.Println(strings.Join(requiresDist, "\n"))
-
 }
